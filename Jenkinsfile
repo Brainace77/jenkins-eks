@@ -4,6 +4,9 @@ pipeline {
         jdk 'Java17'
         maven 'Maven3'
     }
+    environment {
+        SONARQUBE = 'http://172.31.18.183:9000'
+    }
     stages{
         stage("Cleanup Workspace"){
                 steps {
@@ -33,7 +36,7 @@ pipeline {
            steps {
 	           script {
 		        withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') { 
-                        sh "mvn sonar:sonar"
+                        sh "mvn clean install sonar:sonar -Dsonar.host.url=$SONARQUBE"
 		        }
 	           }	
            }
