@@ -5,7 +5,7 @@ pipeline {
         maven 'Maven3'
     }
     environment {
-	    APP_NAME = "CI-CD-test"
+	    APP_NAME = "CI-CD-testapp"
             RELEASE = "1.0.0"
             DOCKER_USER = "mkumarraj"
             DOCKER_PASS = 'dockerhub'
@@ -13,8 +13,6 @@ pipeline {
             IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
 	    JENKINS_API_TOKEN = credentials("JENKINS_API_TOKEN")
     }
-    environment {
-        SONARQUBE = 'http://172.31.18.183:9000'
     }
     stages{
         stage("Cleanup Workspace"){
@@ -47,7 +45,6 @@ pipeline {
                     docker.withRegistry('',DOCKER_PASS) {
                         docker_image = docker.build "${IMAGE_NAME}"
                     }
-
                     docker.withRegistry('',DOCKER_PASS) {
                         docker_image.push("${IMAGE_TAG}")
                         docker_image.push('latest')
