@@ -32,22 +32,30 @@ pipeline {
                  sh "mvn test"
            }
        }
-        stage("SonarQube Analysis"){
-           steps {
-	           script {
-		        withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') { 
-                        sh "mvn clean install sonar:sonar -Dsonar.host.url=$SONARQUBE"
-		        }
-	           }	
-           }
-       }
-       stage("Quality Gate"){
-           steps {
-               script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'jenkins-sonarqube-token'
-                }	
-            }
+	stage("SonarQube Analysis") {
+	    steps {
+	        script {
+	            withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') { 
+	                echo "Running SonarQube analysis"
+	                sh "mvn clean install sonar:sonar -Dsonar.host.url=$SONARQUBE"
+	            }
+	        }
+	    }
+	}
+	
+	stage("Quality Gate") {
+	    steps {
+	        script {
+	            echo "Waiting for SonarQube Quality Gate..."
+	            def qg = waitForQualityGate abortPipeline: false, credentialsId: 'jenkins-sonarqube-token'
+	            if (qg.status != 'OK') {
+	                error "SonarQube Quality Gate failed: ${qg.status}"
+	            } else {
+	                echo "SonarQube Quality Gate passed!"
+	            }
+	        }
+	    }
+	}
 
-        }
    }
 }
