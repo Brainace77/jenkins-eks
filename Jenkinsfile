@@ -5,6 +5,15 @@ pipeline {
         maven 'Maven3'
     }
     environment {
+	    APP_NAME = "CI-CD-test"
+            RELEASE = "1.0.0"
+            DOCKER_USER = "mkumarraj"
+            DOCKER_PASS = 'dockerhub'
+            IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
+            IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
+	    JENKINS_API_TOKEN = credentials("JENKINS_API_TOKEN")
+    }
+    environment {
         SONARQUBE = 'http://172.31.18.183:9000'
     }
     stages{
@@ -32,30 +41,20 @@ pipeline {
                  sh "mvn test"
            }
        }
-	stage("SonarQube Analysis") {
-	    steps {
-	        script {
-	            withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') { 
-	                sh "mvn clean install sonar:sonar -Dsonar.host.url=$SONARQUBE"
-	            }
-	        }
-	    }
-	}
+	stage("Build & Push Docker Image") {
+            steps {
+                script {
+                    docker.withRegistry('',DOCKER_PASS) {
+                        docker_image = docker.build "${IMAGE_NAME}"
+                    }
 
-	
-	stage("Quality Gate") {
-	    steps {
-	        script {
-	            echo "Waiting for SonarQube Quality Gate..."
-	            def qg = waitForQualityGate abortPipeline: false, credentialsId: 'jenkins-sonarqube-token'
-	            if (qg.status != 'OK') {
-	                error "SonarQube Quality Gate failed: ${qg.status}"
-	            } else {
-	                echo "SonarQube Quality Gate passed!"
-	            }
-	        }
-	    }
-	}
+                    docker.withRegistry('',DOCKER_PASS) {
+                        docker_image.push("${IMAGE_TAG}")
+                        docker_image.push('latest')
+                    }
+                }
+            }
 
+       }
    }
 }
