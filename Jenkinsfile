@@ -4,15 +4,6 @@ pipeline {
         jdk 'Java17'
         maven 'Maven3'
     }
-    environment {
-	    APP_NAME = "CI-CD-testapp"
-            RELEASE = "1.0.0"
-            DOCKER_USER = "mkumarraj"
-            DOCKER_PASS = 'dockerhub'
-            IMAGE_NAME = "${DOCKER_USER}" + "/" + "${APP_NAME}"
-            IMAGE_TAG = "${RELEASE}-${BUILD_NUMBER}"
-	    JENKINS_API_TOKEN = credentials("JENKINS_API_TOKEN")
-    }
     stages{
         stage("Cleanup Workspace"){
                 steps {
@@ -22,7 +13,7 @@ pipeline {
 
         stage("Checkout from SCM"){
                 steps {
-                    git branch: 'main', credentialsId: 'github', url: 'https://github.com/Brainace77/jenkins-eks.git'
+                    git branch: 'main', credentialsId: 'GitHub', url: 'https://github.com/Brainace77/jenkins-eks.git'
                 }
         }
 
