@@ -36,12 +36,12 @@ pipeline {
 	    steps {
 	        script {
 	            withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') { 
-	                echo "Running SonarQube analysis"
 	                sh "mvn clean install sonar:sonar -Dsonar.host.url=$SONARQUBE"
 	            }
 	        }
 	    }
 	}
+
 	
 	stage("Quality Gate") {
 	    steps {
